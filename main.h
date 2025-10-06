@@ -1,7 +1,10 @@
 // main.h
-// Josh Brake
-// jbrake@hmc.edu
-// 10/31/22 
+// George Davis
+// gdavis@hmc.edu
+// 10/07/25 
+// Header file of the E155 lab5 main.c file 
+
+//adapted from prof. Brakes main.h example code for the interrupt.c tutorial
 
 #ifndef MAIN_H
 #define MAIN_H
