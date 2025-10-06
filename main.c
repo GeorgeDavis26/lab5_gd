@@ -7,9 +7,58 @@ email.  : gdavis@hmc.edu
 
 */
 
-//#include <stdio.h>
+#include <stdio.h>
+
+#include <stdlib.h>
 
 #include "main.h"
+
+int count = 0;
+
+/*
+    CW INDICATED BY A POSITIVE COUNTER VALUE
+      GPIO 1 BEFORE GPIO 2 
+    CCW INDICATED BY A NEGATIVE COUNTER VALUE
+      GPIO 2 BEFORE GPIO 1
+*/
+void EXTI1_IRQHandler(void){
+    // Check that the correct GPIO pin was what triggered our interrupt
+/*
+GPIO_A
+*/
+    if (EXTI->PR1 & (1 << gpioPinOffset(GPIO_A))){ // checks rising edge
+            //how can we detect rising falling 
+            // check the other 
+        // If so, clear the interrupt (NB: Write 1 to reset.)
+        EXTI->PR1 |= (1 << gpioPinOffset(GPIO_A));
+        // Then perform rotary encoding logic
+        if(digitalRead(GPIO_A) && digitalRead(GPIO_B))        {count--;} //A = 1 B = 1
+        else if(digitalRead(GPIO_A) && ~digitalRead(GPIO_B))  {count++;} //A = 1 B = 0
+        else if(~digitalRead(GPIO_A) && digitalRead(GPIO_B))  {count++;} //A = 0 B = 1
+        else if(~digitalRead(GPIO_A) && ~digitalRead(GPIO_B)) {count--;} //A = 0 B = 0
+    }
+  }
+
+void EXTI2_IRQHandler(void){
+    // Check that the correct GPIO pin was what triggered our interrupt
+/*
+GPIO_B
+*/
+    if (EXTI->PR1 & (1 << gpioPinOffset(GPIO_B))){ // checks rising edge
+            //how can we detect rising falling 
+            // check the other 
+        // If so, clear the interrupt (NB: Write 1 to reset.)
+        EXTI->PR1 |= (1 << gpioPinOffset(GPIO_B));
+        // Then perform rotary encoding logic
+        if(digitalRead(GPIO_A) && digitalRead(GPIO_B))        {count++;} //A = 1 B = 1
+        else if(digitalRead(GPIO_A) && ~digitalRead(GPIO_B))  {count--;} //A = 1 B = 0
+        else if(~digitalRead(GPIO_A) && digitalRead(GPIO_B))  {count--;} //A = 0 B = 1
+        else if(~digitalRead(GPIO_A) && ~digitalRead(GPIO_B)) {count++;} //A = 0 B = 0
+    }
+}
+
+//global
+
 
 int main(void) {
 /*
@@ -60,7 +109,7 @@ GPIO_A
     // Enable falling edge trigger
     EXTI->FTSR1 |= (1 << gpioPinOffset(GPIO_A));// Enable falling edge trigger
     // Turn on EXTI interrupt in NVIC_ISER
-    NVIC->ISER[0] |= (1 << EXTI2_IRQn);
+    NVIC->ISER[0] |= (1 << EXTI1_IRQn);
 
 /*
 GPIO_B
@@ -75,61 +124,26 @@ GPIO_B
     NVIC->ISER[0] |= (1 << EXTI2_IRQn);
 
   uint32_t ms = 250;
-  uint ppr = 408; //Pulses Per Revolution characteristic of the rotary encoder used
+  uint32_t ppr = 408; //Pulses Per Revolution characteristic of the rotary encoder u bsed
 
   while(1){
-    int count = 0;
+    count = 0;
     delay_millis(TIM2, ms);
-    while(!(TIMx->SR & 1)); // Wait for UIF to go high
-      EXTI1_IRQHandler();
-      EXTI2_IRQHandler();
+    float rate = (count / (ppr * (ms * 1e-3) * 4)); // rate calculation
+    if(rate > 0){
+      printf("CW at Rate = ");
+      printf("%f", rate);
+      printf("[rev/sec] \n");
     }
-
-    float rate = count / (ppr * (ms * 1e-3)); // rate calculation
-
-    printf("Rate = ");
-    printf(rate);
-    printf("[rev/sec]");
-  };
-
-/*
-    CW INDICATED BY A POSITIVE COUNTER VALUE
-      GPIO 1 BEFORE GPIO 2 
-    CCW INDICATED BY A NEGATIVE COUNTER VALUE
-      GPIO 2 BEFORE GPIO 1
-*/
-void EXTI1_IRQHandler(void){
-    // Check that the correct GPIO pin was what triggered our interrupt
-/*
-GPIO_A
-*/
-    if (EXTI->PR1 & (1 << gpioPinOffset(GPIO_A))){ // checks rising edge
-            //how can we detect rising falling 
-            // check the other 
-        // If so, clear the interrupt (NB: Write 1 to reset.)
-        EXTI->PR1 |= (1 << gpioPinOffset(GPIO_A));
-        // Then perform rotary encoding logic
-        if(digitalRead(GPIO_A) && digitalRead(GPIO_B))        {count--;} //A = 1 B = 1
-        else if(digitalRead(GPIO_A) && ~digitalRead(GPIO_B))  {count++;} //A = 1 B = 0
-        else if(~digitalRead(GPIO_A) && digitalRead(GPIO_B))  {count++;} //A = 0 B = 1
-        else if(~digitalRead(GPIO_A) && ~digitalRead(GPIO_B)) {count--;} //A = 0 B = 0
+    else if(rate < 0){
+      printf("CCW at Rate = ");
+      printf("%f", rate);
+      printf("[rev/sec] \n");
+    }
+    else{
+      printf("Not Rotating, Rate = ");
+      printf("%f", rate);
+      printf("[rev/sec] \n");
     }
   }
-
-void EXTI2_IRQHandler(void){
-    // Check that the correct GPIO pin was what triggered our interrupt
-/*
-GPIO_B
-*/
-    if (EXTI->PR1 & (1 << gpioPinOffset(GPIO_B))){ // checks rising edge
-            //how can we detect rising falling 
-            // check the other 
-        // If so, clear the interrupt (NB: Write 1 to reset.)
-        EXTI->PR1 |= (1 << gpioPinOffset(GPIO_B));
-        // Then perform rotary encoding logic
-        if(digitalRead(GPIO_A) && digitalRead(GPIO_B))        {count++;} //A = 1 B = 1
-        else if(digitalRead(GPIO_A) && ~digitalRead(GPIO_B))  {count--;} //A = 1 B = 0
-        else if(~digitalRead(GPIO_A) && digitalRead(GPIO_B))  {count--;} //A = 0 B = 1
-        else if(~digitalRead(GPIO_A) && ~digitalRead(GPIO_B)) {count++;} //A = 0 B = 0
-    }
-}
+};

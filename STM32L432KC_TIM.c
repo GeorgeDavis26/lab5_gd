@@ -22,5 +22,5 @@ void delay_millis(TIM_TypeDef * TIMx, uint32_t ms){
   TIMx->SR &= ~(0x1); // Clear UIF
   TIMx->CNT = 0;      // Reset count
 
-//  while(!(TIMx->SR & 1)); // Wait for UIF to go high
+  while(!(TIMx->SR & 1)); // Wait for UIF to go high
 }
