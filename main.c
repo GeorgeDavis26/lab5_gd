@@ -42,11 +42,15 @@ GPIO_A interrupt handler, check for an interrupt then performs encoding logoc
         digitalWrite(GPIO_I, GPIO_I_state);
         */
         //UNCOMMENT TO PERFORM RATE CALCULATION
+        if (digitalRead(GPIO_A) != digitalRead(GPIO_B)) {count++;}
+        else{count--;}
+        /*
         if(digitalRead(GPIO_A) && digitalRead(GPIO_B))        {count--;} //A = 1 B = 1
         else if(digitalRead(GPIO_A) && ~digitalRead(GPIO_B))  {count++;} //A = 1 B = 0
         else if(~digitalRead(GPIO_A) && digitalRead(GPIO_B))  {count++;} //A = 0 B = 1
         else if(~digitalRead(GPIO_A) && ~digitalRead(GPIO_B)) {count--;} //A = 0 B = 0
-
+        else {count++;} //A = 0 B = 0
+*/
     }
   }
 
@@ -59,10 +63,15 @@ GPIO_B interrupt handler, check for an interrupt then performs encoding logic
         // If so, clear the interrupt (NB: Write 1 to reset.)
         EXTI->PR1 |= (1 << gpioPinOffset(GPIO_B));
         // Then perform rotary encoding logic
+        if (digitalRead(GPIO_A) == digitalRead(GPIO_B)) {count++;}
+        else{count--;}
+        /*
         if(digitalRead(GPIO_A) && digitalRead(GPIO_B))        {count++;} //A = 1 B = 1
         else if(digitalRead(GPIO_A) && ~digitalRead(GPIO_B))  {count--;} //A = 1 B = 0
         else if(~digitalRead(GPIO_A) && digitalRead(GPIO_B))  {count--;} //A = 0 B = 1
         else if(~digitalRead(GPIO_A) && ~digitalRead(GPIO_B)) {count++;} //A = 0 B = 0
+        else {count++;} //A = 0 B = 0
+        */
     }
 }
 
@@ -128,7 +137,7 @@ GPIO_B
     // 4. Turn on EXTI interrupt in NVIC_ISER
     NVIC->ISER[0] |= (1 << EXTI2_IRQn);
 
-  uint32_t ms = 250; //duration of the timer
+  uint32_t ms = 500; //duration of the timer
   uint32_t ppr = 408; //Pulses Per Revolution characteristic of the rotary encoder
 /*
   //PROVNG POLING IS SLOW
