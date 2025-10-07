@@ -13,6 +13,7 @@ email.  : gdavis@hmc.edu
 
 #include "main.h"
 
+//global
 int count = 0;
 
 /*
@@ -56,8 +57,6 @@ GPIO_B
         else if(~digitalRead(GPIO_A) && ~digitalRead(GPIO_B)) {count++;} //A = 0 B = 0
     }
 }
-
-//global
 
 
 int main(void) {
@@ -123,7 +122,7 @@ GPIO_B
     // 4. Turn on EXTI interrupt in NVIC_ISER
     NVIC->ISER[0] |= (1 << EXTI2_IRQn);
 
-  uint32_t ms = 250;
+  uint32_t ms = 500;
   uint32_t ppr = 408; //Pulses Per Revolution characteristic of the rotary encoder u bsed
 
   while(1){
