@@ -21,14 +21,13 @@ int volatile count = 0;
 
 int volatile GPIO_I_state = 0;
 int volatile GPIO_P_state = 0;
+
 /*
     CW INDICATED BY A POSITIVE COUNTER VALUE
       GPIO A BEFORE GPIO B
     CCW INDICATED BY A NEGATIVE COUNTER VALUE
       GPIO B BEFORE GPIO A
 */
-
-
 void EXTI1_IRQHandler(void){
 /*
 GPIO_A interrupt handler, check for an interrupt then performs encoding logoc
