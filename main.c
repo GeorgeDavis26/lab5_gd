@@ -1,35 +1,35 @@
 /*
 
 File    : main.c
-Purpose : UPDATE!
+Purpose : contains code to calculate and print on the debug terminal the rev/sec of a motor using
+          a quadrature encoder. This code utilizer two sets of interupt handlers for GPIO pins A and B.
+          see main.h for more info on drivers and headers.
 Author  : George Davis
 email.  : gdavis@hmc.edu
+Date.   : 10/07/25
+
+ADAPTED FROM JOSH BRAKE'S INTERUPT TUTORIAL CODE FOR THE E155 CLASS
 
 */
 
 #include <stdio.h>
-
 #include <stdlib.h>
-
 #include "main.h"
 
-//global
+// DEFINE GLOBAL VAR
 int count = 0;
 
 /*
     CW INDICATED BY A POSITIVE COUNTER VALUE
-      GPIO 1 BEFORE GPIO 2 
+      GPIO A BEFORE GPIO B
     CCW INDICATED BY A NEGATIVE COUNTER VALUE
-      GPIO 2 BEFORE GPIO 1
+      GPIO B BEFORE GPIO A
 */
 void EXTI1_IRQHandler(void){
-    // Check that the correct GPIO pin was what triggered our interrupt
 /*
-GPIO_A
+GPIO_A interrupt handler, check for an interrupt then performs encoding logoc
 */
     if (EXTI->PR1 & (1 << gpioPinOffset(GPIO_A))){ // checks rising edge
-            //how can we detect rising falling 
-            // check the other 
         // If so, clear the interrupt (NB: Write 1 to reset.)
         EXTI->PR1 |= (1 << gpioPinOffset(GPIO_A));
         // Then perform rotary encoding logic
@@ -41,13 +41,10 @@ GPIO_A
   }
 
 void EXTI2_IRQHandler(void){
-    // Check that the correct GPIO pin was what triggered our interrupt
 /*
-GPIO_B
+GPIO_B interrupt handler, check for an interrupt then performs encoding logic
 */
     if (EXTI->PR1 & (1 << gpioPinOffset(GPIO_B))){ // checks rising edge
-            //how can we detect rising falling 
-            // check the other 
         // If so, clear the interrupt (NB: Write 1 to reset.)
         EXTI->PR1 |= (1 << gpioPinOffset(GPIO_B));
         // Then perform rotary encoding logic
@@ -63,17 +60,13 @@ int main(void) {
 /*
 
   main function of lab 5 functionality
-  inititalizes a counter that measures a set period of time
-  then reads four parameters off of the two photosensors on the rotary
+  inititalizes a counter that delays a set period of time (250ms)
+  iterates on a counter on each edge of the two photosensors on the rotary
   quadrature encoder. With the rising and falling edge of each sensor triggering
   a counter to increment the algorithim is awarded a 
-  4x resolution comapared a signle rising edge detection.
+  4x resolution comapared a signle rising edge detection along with direction detection.
 
 */
-
-  //CONFIGURE SYS CLOCK AS PLL
-//    configureFlash();
-//    configureClock();
 
   //CONFIGURE TWO GPIOS AS INPUT
     gpioEnable(GPIO_PORT_A); 
@@ -89,7 +82,6 @@ int main(void) {
     RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;
     initTIM(DELAY_TIM);
 
-    // TODO
     // 1. Enable SYSCFG clock domain in RCC
     RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
     // 2. Configure EXTICR for the input rotary ecoders
@@ -122,8 +114,8 @@ GPIO_B
     // 4. Turn on EXTI interrupt in NVIC_ISER
     NVIC->ISER[0] |= (1 << EXTI2_IRQn);
 
-  uint32_t ms = 500;
-  uint32_t ppr = 408; //Pulses Per Revolution characteristic of the rotary encoder u bsed
+  uint32_t ms = 250; //duration of the timer
+  uint32_t ppr = 408; //Pulses Per Revolution characteristic of the rotary encoder
 
   while(1){
     count = 0;
