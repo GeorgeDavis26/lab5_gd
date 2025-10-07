@@ -55,8 +55,6 @@ GPIO_B interrupt handler, check for an interrupt then performs encoding logic
     }
 }
 
-//global
-
 
 int main(void) {
 /*
