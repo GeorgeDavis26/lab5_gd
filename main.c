@@ -19,19 +19,16 @@ ADAPTED FROM JOSH BRAKE'S INTERUPT TUTORIAL CODE FOR THE E155 CLASS
 // DEFINE GLOBAL VAR
 int volatile count = 0;
 
-int volatile cur_A_state = digitalRead(GPIO_A);
-
 int volatile GPIO_I_state = 0;
 int volatile GPIO_P_state = 0;
-
-int volatile prev_A_state = cur_A_state;
-
 /*
     CW INDICATED BY A POSITIVE COUNTER VALUE
       GPIO A BEFORE GPIO B
     CCW INDICATED BY A NEGATIVE COUNTER VALUE
       GPIO B BEFORE GPIO A
 */
+
+
 void EXTI1_IRQHandler(void){
 /*
 GPIO_A interrupt handler, check for an interrupt then performs encoding logoc
@@ -40,20 +37,20 @@ GPIO_A interrupt handler, check for an interrupt then performs encoding logoc
         // If so, clear the interrupt (NB: Write 1 to reset.)
         EXTI->PR1 |= (1 << gpioPinOffset(GPIO_A));
         // Then perform rotary encoding logic
-        
+        /*
         //UNCOMMENT TO PROVE POLLING IS SLOW
         GPIO_I_state = !GPIO_I_state;
         digitalWrite(GPIO_I, GPIO_I_state);
-
-        /*
+        */
         //UNCOMMENT TO PERFORM RATE CALCULATION
         if(digitalRead(GPIO_A) && digitalRead(GPIO_B))        {count--;} //A = 1 B = 1
         else if(digitalRead(GPIO_A) && ~digitalRead(GPIO_B))  {count++;} //A = 1 B = 0
         else if(~digitalRead(GPIO_A) && digitalRead(GPIO_B))  {count++;} //A = 0 B = 1
         else if(~digitalRead(GPIO_A) && ~digitalRead(GPIO_B)) {count--;} //A = 0 B = 0
-        */
+
     }
   }
+
 
 void EXTI2_IRQHandler(void){
 /*
@@ -134,23 +131,26 @@ GPIO_B
 
   uint32_t ms = 250; //duration of the timer
   uint32_t ppr = 408; //Pulses Per Revolution characteristic of the rotary encoder
-
+/*
   //PROVNG POLING IS SLOW
+  int volatile cur_A_state = digitalRead(GPIO_A);
+  int volatile prev_A_state = cur_A_state;
+
   while(1){
     prev_A_state = cur_A_state;
     cur_A_state = digitalRead(GPIO_A);
-    if((prev_A_state == 0) && (cur_A_state == 1)) {
+    if(prev_A_state != cur_A_state) {
         GPIO_P_state = !GPIO_P_state;
         digitalWrite(GPIO_P, GPIO_P_state);
     }
-    else if((prev_A_state == 1) && (cur_A_state == 0)) {
-        GPIO_P_state = !GPIO_P_state;
-        digitalWrite(GPIO_P, GPIO_P_state);
-    }
-//      delay_millis(DELAY_TIM, 200);
-    }
+    delay_millis(TIM2, 20); //some slow coding process
   }
 
+
+  while(1){
+    delay_millis(TIM2, 20); //some slow coding process
+  };
+*/
   //MAIN FUNCTIONALITY  TO DISPLAY ANGULAGE VELOCITY [REV/SEC] AND DIRECTION 
   while(1){
     count = 0;
